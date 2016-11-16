@@ -1,0 +1,68 @@
+NAME="laughlin-backgrounds"
+VERSION=14.1.0
+RELEASE=1
+CATEGORY="X11"
+SUMMARY="Fedora 14 desktop wallpaper"
+DESCRIPTION="Default wallpaper for the Fedora 14 release, along with a
+collection of selected wallpapers contributed by the Fedora community."
+HOMEPAGE="https://fedoraproject.org/wiki/Design"
+SRC_URI="https://fedorahosted.org/released/design-team/${NAME}-${VERSION}.tar.lzma"
+
+ARCH=noarch
+
+PKG_NAMES="${NAME} ${NAME}-animated ${NAME}-extras"
+laughlin_backgrounds_DOCS="Attribution CC-BY-SA-3.0"
+laughlin_backgrounds_CONTENTS="
+	usr/share/backgrounds/laughlin/default/
+	usr/share/backgrounds/xfce/laughlin.*
+	usr/share/gnome-background-properties/desktop-backgrounds-laughlin.xml
+	usr/share/mate-background-properties/desktop-backgrounds-laughlin.xml
+	usr/share/wallpapers/Laughlin/
+"
+laughlin_backgrounds_animated_DOCS="Attribution CC-BY-SA-3.0"
+laughlin_backgrounds_animated_CONTENTS="
+	usr/share/backgrounds/laughlin/default-tod/
+	usr/share/gnome-background-properties/desktop-backgrounds-laughlin-animated.xml
+	usr/share/mate-background-properties/desktop-backgrounds-laughlin-animated.xml
+"
+laughlin_backgrounds_extras_DOCS="Attribution CC-BY-SA-3.0"
+laughlin_backgrounds_extras_CONTENTS="
+	usr/share/backgrounds/laughlin/extras/
+	usr/share/backgrounds/xfce/laughlin-*
+	usr/share/gnome-background-properties/desktop-backgrounds-laughlin-extras.xml
+	usr/share/mate-background-properties/desktop-backgrounds-laughlin-extras.xml
+	usr/share/wallpapers/Laughlin_*/
+"
+
+CYGPORT_USE_UNSTABLE_API=1
+src_unpack_hook() {
+	mv 'CC-BY-SA 3.0' CC-BY-SA-3.0
+}
+
+src_compile() {
+	cd ${S}
+	cygmake
+}
+
+src_install() {
+	cd ${S}
+	cyginstall
+	mv ${D}/usr/share/{xfce4/backdrops,backgrounds/xfce}
+
+	dodir /usr/share/mate-background-properties
+	sed -e 's|gnome-wp|mate-wp|' default/desktop-backgrounds-laughlin.xml \
+	    > ${D}/usr/share/mate-background-properties/desktop-backgrounds-laughlin.xml
+	sed -e 's|gnome-wp|mate-wp|' default-tod/desktop-backgrounds-laughlin-animated.xml \
+	    > ${D}/usr/share/mate-background-properties/desktop-backgrounds-laughlin-animated.xml
+	sed -e 's|gnome-wp|mate-wp|' extras/desktop-backgrounds-laughlin-extras.xml \
+	    > ${D}/usr/share/mate-background-properties/desktop-backgrounds-laughlin-extras.xml
+
+	dodir /usr/share/backgrounds/xfce
+	dosym ../../backgrounds/laughlin/default/wide/laughlin.png \
+	      /usr/share/backgrounds/xfce/laughlin.png
+
+	for f in ${D}/usr/share/backgrounds/laughlin/extras/*.jpg
+	do
+		dosym ../../${f##*/share/} /usr/share/backgrounds/xfce/laughlin-${f##*/}
+	done
+}
